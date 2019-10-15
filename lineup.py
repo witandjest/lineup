@@ -11,11 +11,31 @@
 # https://www.fleaflicker.com/nhl/leagues/12086/players/confirm?toAddPlayerId=331
 
 
+# ADD REQUEST (POST)
+# https://www.fleaflicker.com/nhl/leagues/12086/players/add
+# toAddPlayerId
+# toDropPlayerId
+
+
 import requests
+import time
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
 
-addPlayerURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/confirm?toAddPlayerId=331'
+
+def addPlayer(session, playerID):
+    playerData = {'toAddPlayerId':playerID,'toDropPlayerId':''}
+    r = session.post(url = addPlayerURL, headers=headers, data=playerData)
+
+    parsedResponse = BeautifulSoup(r.content, 'html.parser')  
+    
+    return parsedResponse
+
+
+
+getSessionURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/confirm?toAddPlayerId=331'
+
+addPlayerURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/add'
 loginURL = 'https://www.fleaflicker.com/nfl/login';
 
 headers = {'User-Agent': 'Mozilla/5.0'}
@@ -23,7 +43,7 @@ payload = {'email':'witjest@gmail.com','password':'ferrari@767', 'keepMe':'true'
 
 
 session = requests.Session()
-r = session.get(url = addPlayerURL, headers=headers)
+r = session.get(url = getSessionURL, headers=headers)
 
 cookies = requests.utils.cookiejar_from_dict(requests.utils.dict_from_cookiejar(session.cookies))
 
@@ -33,12 +53,38 @@ loginRequest = session.post(loginURL,headers=headers,data=payload, cookies=cooki
 #print(BeautifulSoup(loginRequest.content, 'html.parser').prettify())
 #print('=====================')
 
-
-r = session.get(url = addPlayerURL, headers=headers)
+#playerData = {'toAddPlayerId':'331','toDropPlayerId':''}
+#r = session.post(url = addPlayerURL, headers=headers, data=playerData)
 
 #print(r.content);
 
-print(BeautifulSoup(r.content, 'html.parser').prettify())
+#parsedResponse = BeautifulSoup(r.content, 'html.parser')    # stored as HTML
+#prettyResponse = parsedResponse.prettify()                  # stored as string
+#print(prettyResponse[8000:16000])
+
+
+# if alert exists, keep trying? something to that effect
+# alertList = parsedResponse.select('.alert-danger')
+
+
+
+
+
+playerID = '331'
+addResponse = addPlayer(session, playerID)
+
+alertList = addResponse.select('.alert-danger')
+
+timeoutCount = 0
+while (len(alertList) > 0 and timeoutCount < 10):
+    addResponse = addPlayer(session, playerID)
+    alertList = addResponse.select('.alert-danger')
+
+    print(alertList[0].text)
+
+    time.sleep(0.5)
+    timeoutCount += 1
+
 
 print(r.status_code)
 
