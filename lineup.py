@@ -16,39 +16,6 @@
 # toAddPlayerId
 # toDropPlayerId
 
-
-import requests
-import time
-from requests.auth import HTTPBasicAuth
-from bs4 import BeautifulSoup
-
-
-def addPlayer(session, playerID):
-    playerData = {'toAddPlayerId':playerID,'toDropPlayerId':''}
-    r = session.post(url = addPlayerURL, headers=headers, data=playerData)
-
-    parsedResponse = BeautifulSoup(r.content, 'html.parser')  
-    
-    return parsedResponse
-
-
-
-getSessionURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/confirm?toAddPlayerId=331'
-
-addPlayerURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/add'
-loginURL = 'https://www.fleaflicker.com/nfl/login';
-
-headers = {'User-Agent': 'Mozilla/5.0'}
-payload = {'email':'witjest@gmail.com','password':'ferrari@767', 'keepMe':'true'}
-
-
-session = requests.Session()
-r = session.get(url = getSessionURL, headers=headers)
-
-cookies = requests.utils.cookiejar_from_dict(requests.utils.dict_from_cookiejar(session.cookies))
-
-loginRequest = session.post(loginURL,headers=headers,data=payload, cookies=cookies)
-
 #print(loginRequest.content)
 #print(BeautifulSoup(loginRequest.content, 'html.parser').prettify())
 #print('=====================')
@@ -68,30 +35,65 @@ loginRequest = session.post(loginURL,headers=headers,data=payload, cookies=cooki
 
 
 
+import requests
+import time
+from requests.auth import HTTPBasicAuth
+from bs4 import BeautifulSoup
+
+from Connection import Connection
+
+addPlayerURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/add'
+headers = {'User-Agent': 'Mozilla/5.0'}
+
+def addPlayer(session, playerID):
+    playerData = {'toAddPlayerId':playerID,'toDropPlayerId':''}
+    r = session.post(url = addPlayerURL, headers=headers, data=playerData)
+
+    parsedResponse = BeautifulSoup(r.content, 'html.parser')  
+    
+    return parsedResponse
 
 
-playerID = '331'
-addResponse = addPlayer(session, playerID)
+# request object? has methods like: hasError(), printError(), 
 
-alertList = addResponse.select('.alert-danger')
 
-timeoutCount = 0
-while (len(alertList) > 0 and timeoutCount < 10):
-    addResponse = addPlayer(session, playerID)
+def connectAndAdd():
+    connection = Connection()
+
+    #playerIDs = []
+    #connection.addPlayers([])
+    
+
+    session = connection.session
+
+    #3194    3065   3041
+    playerIDs = ['2789', '1', '2', '3', '4']    # allow this to be a list
+
+    targetPlayerID = playerIDs[0];
+    addResponse = connection.addPlayer(targetPlayerID)
+
     alertList = addResponse.select('.alert-danger')
 
-    print(alertList[0].text)
+    timeoutCount = 0
+    while (len(alertList) > 0 and timeoutCount < 180):
+        addResponse = connection.addPlayer(targetPlayerID)
+        alertList = addResponse.select('.alert-danger')
 
-    time.sleep(0.5)
-    timeoutCount += 1
+        if(len(alertList) > 0):
+            print(alertList[0].text)
+        else:
+            print('Player added successfully: ' + playerID)
+            for playerID in playerIDs[1:]:
+                connection.addPlayer(playerID)
+                print('Player added successfully: ' + playerID)
+
+        time.sleep(0.5)
+        timeoutCount += 1
+        
+    print(addResponse.status_code)
 
 
-print(r.status_code)
-
-player_ids = ['4723', '3474']
-
-for player in player_ids:
-    print(player)
+connectAndAdd();
 
 
 # Next Steps:
@@ -99,12 +101,6 @@ for player in player_ids:
 # create a fake league with 4 teams so that you can test adds
 # refresh until a player becomes available
 # try running at 8am for a few days, then attach to a cron when it works (AWS Lambda)
-
-
-
-
-
-
 
 # for each player, try to add - check response?
 # or spam requests every 10 seconds <--
