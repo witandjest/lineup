@@ -1,6 +1,6 @@
 import json
 
-import connectAndAdd from lineup
+from lineup import connectAndAdd
 
 def lambda_handler(event, context):
     

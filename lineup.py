@@ -37,37 +37,34 @@
 
 import requests
 import time
-from requests.auth import HTTPBasicAuth
-from bs4 import BeautifulSoup
+import json
 
-from Connection import Connection
+from FleaflickerConnection import FleaflickerConnection
+from Roster import Roster
 
 addPlayerURL = 'https://www.fleaflicker.com/nhl/leagues/12086/players/add'
-headers = {'User-Agent': 'Mozilla/5.0'}
-
-def addPlayer(session, playerID):
-    playerData = {'toAddPlayerId':playerID,'toDropPlayerId':''}
-    r = session.post(url = addPlayerURL, headers=headers, data=playerData)
-
-    parsedResponse = BeautifulSoup(r.content, 'html.parser')  
-    
-    return parsedResponse
-
+HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 # request object? has methods like: hasError(), printError(), 
 
 
+def getWeeklySchedule():
+
+    return False
+
+
+def getCurrentRoster():
+
+    roster = Roster();
+
+
+
+
+
 def connectAndAdd():
-    connection = Connection()
+    connection = FleaflickerConnection()
 
-    #playerIDs = []
-    #connection.addPlayers([])
-    
-
-    session = connection.session
-
-    #3194    3065   3041
-    playerIDs = ['2789', '1', '2', '3', '4']    # allow this to be a list
+    playerIDs = ['2789']
 
     targetPlayerID = playerIDs[0];
     addResponse = connection.addPlayer(targetPlayerID)
@@ -93,7 +90,7 @@ def connectAndAdd():
     print(addResponse.status_code)
 
 
-connectAndAdd();
+getCurrentRoster();
 
 
 # Next Steps:

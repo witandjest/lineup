@@ -7,10 +7,9 @@ LOGIN_INFO = {'email':'witjest@gmail.com','password':'somethingunique@94', 'keep
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 import requests
-from requests.auth import HTTPBasicAuth
-from bs4 import BeautifulSoup
+import bs4
 
-class Connection:
+class FleaflickerConnection:
 
     session = False
 
@@ -30,7 +29,7 @@ class Connection:
         playerData = {'toAddPlayerId':playerID,'toDropPlayerId':''}
         addPlayerResponse = self.session.post(url = ADD_PLAYER_URL, headers=HEADERS, data=playerData)
 
-        parsedResponse = BeautifulSoup(addPlayerResponse.content, 'html.parser')  
+        parsedResponse = bs4.BeautifulSoup(addPlayerResponse.content, 'html.parser')  
         return parsedResponse
 
     
