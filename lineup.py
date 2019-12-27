@@ -54,11 +54,7 @@ def getWeeklySchedule():
 
 
 def getCurrentRoster():
-
     roster = Roster();
-
-
-
 
 
 def connectAndAdd():
